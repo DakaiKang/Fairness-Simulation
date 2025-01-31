@@ -108,6 +108,33 @@ def update_transaction_deliver_times(transactions, t, n, s, d, num_slot, f):
     print("Updated deliver_time[0:f] for all transactions.")
 
 
+
+def generate_local_orderings(transactions, n):
+    """
+    Generate local orderings by sorting all transactions based on deliver_time[i] for i from 0 to n-1.
+    Return a dictionary mapping ID to index in the sorted transactions for each i.
+
+    :param transactions: A list of Transaction objects.
+    :param n: The number of indices to consider in deliver_time.
+    :return: A dictionary where keys are indices i, and values are mappings of ID to index in the sorted list.
+    """
+    local_orderings = []
+
+    for i in range(n):
+        # Ensure i is within the valid range of deliver_time indices for all transactions
+        for txn in transactions:
+            if i >= len(txn.deliver_time):
+                raise ValueError(f"Index {i} is out of range for deliver_time in transaction ID {txn.ID}.")
+
+        # Sort transactions based on the i-th deliver_time
+        sorted_transactions = sorted(transactions, key=lambda txn: txn.deliver_time[i])
+
+        # Create a dictionary mapping ID to index for this deliver_time[i]
+        local_orderings.append({txn.ID: idx for idx, txn in enumerate(sorted_transactions)})
+
+    return local_orderings
+
+
 def __test__():
     t = 1000
     s = 1

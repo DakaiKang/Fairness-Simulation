@@ -103,7 +103,7 @@ def find_and_update_causal_history(dag_vertices, num_slot, n):
                             if next_vertex not in leader_vertex.causal_history:
                                 leader_vertex.causal_history.add(next_vertex)
                                 stack.append(next_vertex)
-
+                print("Update Causal History:", leader_vertex.causal_history)
 
 def __test__():
     t = 1000
@@ -131,7 +131,7 @@ def __test__():
 
 
 
-__test__()
+# __test__()
 
 # for transaction in transactions:
 #     print(transaction.ID, ":", transaction.average_deliver_time, transaction.deliver_time, transaction.deliver_ID)

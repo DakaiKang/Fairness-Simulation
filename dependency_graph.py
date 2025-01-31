@@ -1,5 +1,7 @@
+import networkx as nx
 from DAG import *
-import networks as nx
+import numpy as np
+
 
 def initiate_dependency_graph(t):
     """
@@ -57,3 +59,76 @@ def update_dependency_graph(dependency_graph, local_orderings, threshold):
             elif weight_ba > weight_ab:
                 if weight_ba >= threshold:
                     dependency_graph.add_edge(node_b, node_a)
+
+
+def find_hamiltonian_path(tournament_graph):
+    """
+    Finds a Hamiltonian path in a tournament graph.
+
+    :param tournament_graph: A directed graph (networkx.DiGraph) representing a tournament.
+    :return: A list of nodes representing the Hamiltonian path, or None if no path exists.
+    """
+    if not nx.is_directed(tournament_graph):
+        raise ValueError("The graph must be a directed tournament.")
+
+    nodes = list(tournament_graph.nodes())
+    if len(nodes) < 2:
+        return nodes  # A single node or empty graph trivially has a Hamiltonian path
+
+    # Start with the first node as the initial path
+    nodes.sort()
+    # random.shuffle(nodes)
+    path = [nodes[-1]]
+
+    for node in nodes[-2::-1]:
+        inserted = False
+        # Insert the node in the correct position in the current path
+        for i, current_node in enumerate(path):
+            if tournament_graph.has_edge(node, current_node):  # If there's an edge node -> current_node
+                path.insert(i, node)
+                inserted = True
+                break
+        if not inserted:
+            # If the node doesn't have an edge to any node in the current path, append it
+            path.append(node)
+    return path
+
+
+def __test__():
+    t = 5
+    s = 100
+    d = 1
+    n = 4
+    isThemis = False
+    f = (n-1)//4 if isThemis else (n-1)//3
+    distance = 1
+    num_slot = 5
+    is_leader_faulty = False
+    deliver_based = True
+
+
+    transactions = generate_transactions(t, s, d, n)
+    transactions = sort_transactions_by_average_deliver_time(transactions)
+
+    dag_vertices = initialize_dag_vertices(transactions, n, t, num_slot)
+    find_and_update_causal_history(dag_vertices, num_slot, n)
+    for current_round in range(0, num_slot, 2):
+        for replica in range(n):
+            leader_vertex = dag_vertices[replica][current_round]
+            if leader_vertex.is_leader:
+                print(replica, current_round, leader_vertex.causal_history)
+
+    dg = initiate_dependency_graph(t)
+    construct_dependency_graph(dg, dag_vertices, transactions, n, num_slot, f)
+    # Create an adjacency matrix from the DiGraph
+    adj_matrix = nx.to_numpy_array(dg, nodelist=sorted(G.nodes()))
+
+    # Print the adjacency matrix
+    print("\nAdjacency Matrix:")
+    print(adj_matrix)
+
+# __test__()
+
+# for transaction in transactions:
+#     print(transaction.ID, ":", transaction.average_deliver_time, transaction.deliver_time, transaction.deliver_ID)
+
