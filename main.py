@@ -7,7 +7,7 @@ from RL import *
 from distance import *
 
 
-def Run_Themis(dg, n, t, s, d, num_slot, transactions, deliver_based, is_leader_faulty):
+def Run_Themis(dg, n, t, s, d, num_slot, transactions, deliver_based, is_leader_faulty, distances):
     f = (n-1)//4
 
     if is_leader_faulty:
@@ -27,11 +27,11 @@ def Run_Themis(dg, n, t, s, d, num_slot, transactions, deliver_based, is_leader_
     # print("\nAdjacency Matrix:")
     # print(adj_matrix)
     print("Themis Path: ", path)
-    return correlation(transactions, deliver_based)
+    return correlation(transactions, deliver_based), calculate_distances_correct_ratio(transactions, distances)
     
 
 
-def Run_FairDAG_RL(dg, transactions, n, t, s, d, num_slot, deliver_based, is_leader_faulty):
+def Run_FairDAG_RL(dg, transactions, n, t, s, d, num_slot, deliver_based, is_leader_faulty, distances):
     f = (n-1)//3
 
     if is_leader_faulty:
@@ -56,13 +56,13 @@ def Run_FairDAG_RL(dg, transactions, n, t, s, d, num_slot, deliver_based, is_lea
     # print("\nAdjacency Matrix:")
     # print(adj_matrix)
     print("FairDAG_RL Path: ", path)
-    return correlation(transactions, deliver_based)
+    return correlation(transactions, deliver_based), calculate_distances_correct_ratio(transactions, distances)
 
 
 def RL_Fairness_Test():
-    t = 20
+    t = 200
     s = 1
-    d = 10
+    d = 100
     n = 49
     isThemis = True
     distance = 1
@@ -73,11 +73,11 @@ def RL_Fairness_Test():
     transactions = generate_transactions(t, s, d, n)
     transactions = sort_transactions_by_average_deliver_time(transactions)
     distances = calculate_distances(transactions)
-    print(distances)
 
-    # value1 = Run_Themis(initiate_dependency_graph(t), n, t, s, d, num_slot, transactions, deliver_based, is_leader_faulty)
-    # value2 = Run_FairDAG_RL(initiate_dependency_graph(t), transactions, n, t, s, d, num_slot, deliver_based, is_leader_faulty)
-    # print("Themis Correlation: ", value1)
-    # print("FairDAG_RL Correlation: ", value2)
+
+    value1, distance_value1 = Run_Themis(initiate_dependency_graph(t), n, t, s, d, num_slot, transactions, deliver_based, is_leader_faulty, distances)
+    value2, distance_value2 = Run_FairDAG_RL(initiate_dependency_graph(t), transactions, n, t, s, d, num_slot, deliver_based, is_leader_faulty, distances)
+    print("Themis Correlation: ", value1, distance_value1)
+    print("FairDAG_RL Correlation: ", value2, distance_value2)
 
 RL_Fairness_Test()

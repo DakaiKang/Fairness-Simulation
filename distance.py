@@ -1,4 +1,5 @@
 from transactions import *
+from collections import OrderedDict
 
 def calculate_distance(txn1, txn2):
     count = 0
@@ -30,11 +31,20 @@ def is_correct_pair(txn1, txn2, distances):
 
 
 def calculate_distances_correct_ratio(transactions, distances):
-    total = 0
-    correct = 0
+    total = dict()
+    correct = dict()
     for i in range(len(transactions)):
         for j in range(i+1, len(transactions)):
-            total += 1
-            if (is_correct_pair(transactions[i], transactions[j])):
-                correct += 1
-    return correct/total
+            distance = distances[(transactions[i].ID, transactions[j].ID)]
+            if distance < 0:
+                distance = -distance
+            if distance not in total:
+                total[distance] = 0
+                correct[distance] = 0
+            total[distance] = total[distance] + 1
+            if (is_correct_pair(transactions[i], transactions[j], distances)):
+                correct[distance] = correct[distance] + 1
+    for i in total:
+        correct[i] = correct[i]/total[i]
+    sorted_dict = OrderedDict(sorted(correct.items()))
+    return sorted_dict
